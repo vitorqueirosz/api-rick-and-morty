@@ -7,7 +7,7 @@ export const Form = styled.form`
     input {
         flex: 1;
         border-radius: 4px;
-        border: 1px solid #03bb85;
+        border: 1px solid ${(props) => (props.error ? '#e57373' : '#03bb85')};
         padding: 10px 15px;
         flex-direction: row;
         font-size: 16px;
@@ -52,7 +52,19 @@ export const SubmitButton = styled.button.attrs((props) => ({
             }
         `}
 `;
-
+export const RefreshButton = styled.button.attrs({
+    type: 'reset',
+})`
+    padding: 0 15px;
+    border-radius: 4px;
+    border: 1px solid #fff;
+    background-color: #03bb85;
+    color: #fff;
+    margin-left: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+`;
 export const List = styled.ul`
     padding: 20px;
     margin-top: 15px;
@@ -73,13 +85,23 @@ export const List = styled.ul`
         }
         a {
             text-decoration: none;
-            font-size: 14px;
+            font-size: 16px;
             color: #2f9331;
+
+            &:hover {
+                color: #008000;
+                transition: 0.2s;
+            }
+        }
+        span {
+            font-size: 18px;
+            /* cursor: pointer; */
         }
         img {
-            border-radius: 50%;
-            height: 50px;
-            width: 50px;
+            height: 90px;
+            width: 90px;
+
+            border-radius: 4px;
         }
     }
 `;

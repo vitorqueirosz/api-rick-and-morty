@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Proptypes from 'prop-types';
 import api from '../../services/api';
 
-import { Container, CharList, Link, Card } from './styles';
+import { Container, CharList, Link, Card, Loading } from './styles';
 
 class Characters extends Component {
     static propTypes = {
@@ -37,16 +37,19 @@ class Characters extends Component {
         };
         this.setState({
             character: data,
+            loading: false,
         });
-
-        // name, status, species, origin.name, lastlocation
     }
 
     render() {
-        const { character } = this.state;
+        const { character, loading } = this.state;
+
+        if (loading) {
+            return <Loading>Carregando...</Loading>;
+        }
 
         return (
-            <Container>
+            <Container loading={loading}>
                 <img src="" alt="" />
                 <Link href="/">Voltar aos personagens</Link>
                 <CharList>
@@ -63,7 +66,7 @@ class Characters extends Component {
                         <p>{character.location}</p>
                     </Card>
                 </CharList>
-                <small>by vitorqueirosz</small>
+                <small>`</small>
             </Container>
         );
     }

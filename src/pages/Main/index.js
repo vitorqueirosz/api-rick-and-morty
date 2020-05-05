@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import { FaPlus, FaSpinner } from 'react-icons/fa';
+import { MdRefresh } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { Container } from '../../Container';
 import api from '../../services/api';
-import { Form, SubmitButton, List } from './styles';
+import { Form, SubmitButton, List, RefreshButton } from './styles';
 
 class Main extends Component {
     state = {
         newChar: '',
         characters: [],
         loading: false,
+        error: null,
     };
 
     componentDidMount() {
@@ -29,34 +31,52 @@ class Main extends Component {
     }
 
     handleInput = (e) => {
-        this.setState({ newChar: e.target.value });
+        this.setState({ newChar: e.target.value, error: null });
     };
 
     handleSubmit = async (e) => {
         e.preventDefault();
 
-        this.setState({ loading: true });
+        this.setState({ loading: true, error: false });
 
         const { newChar, characters } = this.state;
+        try {
+            if (newChar === '') throw new Error('Digite um personagem');
 
-        const response = await api.get(`/character/?name=${newChar}`);
+            const hasChar = characters.find((c) => c.data === newChar);
 
-        const data = {
-            name: response.data.results[0].name,
-            avatar_url: response.data.results[0].image,
-        };
+            if (hasChar === newChar) throw new Error('Personagem duplicado!');
 
-        console.log(response.data);
+            const response = await api.get(`/character/?name=${newChar}`);
 
-        this.setState({
-            characters: [...characters, data],
-            newChar: '',
-            loading: false,
-        });
+            const data = response.data.results.map((value) => ({
+                name: value.name,
+                avatar_url: value.image,
+            }));
+
+            console.log(data);
+
+            const unShiftChar = characters.unshift(...data);
+            console.log(unShiftChar);
+
+            this.setState({
+                characters: [...characters],
+                newChar: '',
+                loading: false,
+            });
+        } catch (error) {
+            this.setState({ error: true });
+        } finally {
+            this.setState({ loading: false });
+        }
+    };
+
+    handleReset = () => {
+        this.setState({ characters: [], newChar: '', error: false });
     };
 
     render() {
-        const { newChar, characters, loading } = this.state;
+        const { newChar, characters, loading, error } = this.state;
 
         return (
             <Container>
@@ -68,7 +88,11 @@ class Main extends Component {
                     Rick and Mortys API
                 </h1>
 
-                <Form onSubmit={this.handleSubmit}>
+                <Form
+                    onSubmit={this.handleSubmit}
+                    onReset={this.handleReset}
+                    error={error}
+                >
                     <input
                         value={newChar}
                         onChange={this.handleInput}
@@ -83,15 +107,30 @@ class Main extends Component {
                             <FaPlus size={16} color="#fff" />
                         )}
                     </SubmitButton>
+                    <RefreshButton>
+                        <MdRefresh size={20} color="#fff" />
+                    </RefreshButton>
                 </Form>
                 <List>
                     {characters.map((character) => (
                         <li key={String(character.id)}>
-                            <img
-                                src={character.avatar_url}
-                                alt={character.name}
-                            />
-                            <span>{character.name}</span>
+                            <Link
+                                to={`/character/${encodeURIComponent(
+                                    character.name
+                                )}`}
+                            >
+                                <img
+                                    src={character.avatar_url}
+                                    alt={character.name}
+                                />
+                            </Link>
+                            <span
+                                href={`/character/${encodeURIComponent(
+                                    character.name
+                                )}`}
+                            >
+                                {character.name}
+                            </span>
                             <Link
                                 to={`/character/${encodeURIComponent(
                                     character.name
